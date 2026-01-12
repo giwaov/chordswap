@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #09091a 0%, #0f0f23 50%, #1a1a3e 100%);
+  min-height: 100vh;
+}
+
+.swap-card {
+  @apply bg-arc-dark/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.token-input {
+  @apply w-full bg-arc-darker border border-white/10 rounded-xl p-4 text-white text-2xl font-medium;
+  @apply focus:outline-none focus:border-arc-primary/50 focus:ring-2 focus:ring-arc-primary/20;
+}
+
+.btn-primary {
+  @apply w-full py-4 px-6 bg-gradient-to-r from-arc-primary to-arc-secondary;
+  @apply text-white font-semibold rounded-xl text-lg;
+  @apply hover:opacity-90 transition-all duration-200;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-connect {
+  @apply px-6 py-2.5 bg-arc-primary/20 border border-arc-primary/50 rounded-xl;
+  @apply text-arc-primary font-medium hover:bg-arc-primary/30 transition-all;
+}
