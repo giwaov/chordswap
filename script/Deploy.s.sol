@@ -5,6 +5,8 @@ import "forge-std/Script.sol";
 import "../src/ArcFactory.sol";
 import "../src/ArcRouter.sol";
 import "../src/ArcToken.sol";
+import "../src/PerpExchange.sol";
+import "../src/PriceOracle.sol";
 
 /**
  * @title DeployArcDex
@@ -115,6 +117,105 @@ contract AddLiquidity is Script {
         console.log("Amount A:", actualA);
         console.log("Amount B:", actualB);
         console.log("LP tokens:", liquidity);
+        
+        vm.stopBroadcast();
+    }
+}
+
+/**
+ * @title DeployPerpExchange
+ * @dev Deployment script for the Perpetual DEX
+ * 
+ * Usage:
+ * forge script script/Deploy.s.sol:DeployPerpExchange --rpc-url $ARC_TESTNET_RPC_URL --private-key $PRIVATE_KEY --broadcast
+ */
+contract DeployPerpExchange is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+        
+        // Use Token A as collateral (or you can use a stablecoin)
+        address collateralToken = vm.envAddress("TOKEN_A_ADDRESS");
+        
+        console.log("Deploying Perp Exchange contracts...");
+        console.log("Deployer:", deployer);
+        console.log("Collateral Token:", collateralToken);
+        
+        vm.startBroadcast(deployerPrivateKey);
+
+        // Deploy Price Oracle
+        PriceOracle priceOracle = new PriceOracle();
+        console.log("PriceOracle deployed at:", address(priceOracle));
+
+        // Deploy Perp Exchange
+        PerpExchange perpExchange = new PerpExchange(collateralToken, address(priceOracle));
+        console.log("PerpExchange deployed at:", address(perpExchange));
+
+        // Add Token B as a tradeable market
+        address tokenB = vm.envAddress("TOKEN_B_ADDRESS");
+        perpExchange.addMarket(tokenB);
+        console.log("Added market for Token B:", tokenB);
+        
+        // Set initial price for Token B (1 USD = 1e18)
+        priceOracle.setPrice(tokenB, 1e18);
+        console.log("Set initial price for Token B: $1.00");
+
+        vm.stopBroadcast();
+
+        console.log("\n=== Perp Exchange Deployment Summary ===");
+        console.log("Price Oracle:", address(priceOracle));
+        console.log("Perp Exchange:", address(perpExchange));
+        console.log("Collateral Token:", collateralToken);
+        console.log("Tradeable Market:", tokenB);
+        console.log("\nSave these addresses in your .env file!");
+    }
+}
+
+/**
+ * @title SetupPerpMarket
+ * @dev Script to add a new market to the Perp Exchange
+ */
+contract SetupPerpMarket is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address perpExchangeAddress = vm.envAddress("PERP_EXCHANGE_ADDRESS");
+        address oracleAddress = vm.envAddress("ORACLE_ADDRESS");
+        address tokenAddress = vm.envAddress("NEW_MARKET_TOKEN");
+        uint256 initialPrice = vm.envUint("INITIAL_PRICE"); // in wei (1e18 = $1)
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        PerpExchange perp = PerpExchange(perpExchangeAddress);
+        PriceOracle oracle = PriceOracle(oracleAddress);
+        
+        // Add market
+        perp.addMarket(tokenAddress);
+        console.log("Added market:", tokenAddress);
+        
+        // Set initial price
+        oracle.setPrice(tokenAddress, initialPrice);
+        console.log("Set price:", initialPrice);
+        
+        vm.stopBroadcast();
+    }
+}
+
+/**
+ * @title UpdatePrice
+ * @dev Script to update token price in oracle
+ */
+contract UpdatePrice is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address oracleAddress = vm.envAddress("ORACLE_ADDRESS");
+        address tokenAddress = vm.envAddress("TOKEN_ADDRESS");
+        uint256 newPrice = vm.envUint("NEW_PRICE"); // in wei (1e18 = $1)
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        PriceOracle oracle = PriceOracle(oracleAddress);
+        oracle.setPrice(tokenAddress, newPrice);
+        console.log("Updated price for", tokenAddress, "to", newPrice);
         
         vm.stopBroadcast();
     }

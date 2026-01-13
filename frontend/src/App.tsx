@@ -3,9 +3,10 @@ import { Toaster } from 'react-hot-toast';
 import { useWallet } from './hooks/useWallet';
 import SwapCard from './components/SwapCard';
 import LiquidityCard from './components/LiquidityCard';
+import PerpCard from './components/PerpCard';
 import Header from './components/Header';
 
-type Tab = 'swap' | 'liquidity';
+type Tab = 'swap' | 'liquidity' | 'perp';
 
 function App() {
   const wallet = useWallet();
@@ -23,7 +24,7 @@ function App() {
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setActiveTab('swap')}
-              className={`flex-1 py-3 px-6 rounded-xl font-medium transition-all ${
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                 activeTab === 'swap'
                   ? 'bg-arc-primary text-white'
                   : 'bg-arc-dark/50 text-gray-400 hover:text-white'
@@ -33,7 +34,7 @@ function App() {
             </button>
             <button
               onClick={() => setActiveTab('liquidity')}
-              className={`flex-1 py-3 px-6 rounded-xl font-medium transition-all ${
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                 activeTab === 'liquidity'
                   ? 'bg-arc-primary text-white'
                   : 'bg-arc-dark/50 text-gray-400 hover:text-white'
@@ -41,13 +42,26 @@ function App() {
             >
               Liquidity
             </button>
+            <button
+              onClick={() => setActiveTab('perp')}
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
+                activeTab === 'perp'
+                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                  : 'bg-arc-dark/50 text-gray-400 hover:text-white'
+              }`}
+            >
+              ⚡ Perps
+            </button>
           </div>
 
           {/* Cards */}
-          {activeTab === 'swap' ? (
-            <SwapCard wallet={wallet} />
-          ) : (
-            <LiquidityCard wallet={wallet} />
+          {activeTab === 'swap' && <SwapCard wallet={wallet} />}
+          {activeTab === 'liquidity' && <LiquidityCard wallet={wallet} />}
+          {activeTab === 'perp' && (
+            <PerpCard 
+              account={wallet.address || ''} 
+              provider={wallet.provider} 
+            />
           )}
 
           {/* Network Warning */}

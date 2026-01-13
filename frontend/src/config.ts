@@ -19,6 +19,9 @@ export const CONTRACTS = {
   router: '0x4e739222ef41B7f6452058cDA9a2b1d41F4fc04B',
   tokenA: '0x4D4EbDeB51b524c58139323d0D2E00e1D05751Fa',
   tokenB: '0xDB8A2c2A1aFB10e37D1A3F8DFF97374665e47376',
+  // Perp DEX contracts
+  perpExchange: '0xdE830e296d410f5B605c8D046D761692951Cafee',
+  priceOracle: '0x77bF48BC59750D8B2c672538d14d56F11226AAd5',
 };
 
 // ABI snippets for contract interaction
@@ -59,4 +62,29 @@ export const ERC20_ABI = [
   'function allowance(address owner, address spender) external view returns (uint256)',
   'function approve(address spender, uint256 amount) external returns (bool)',
   'function faucet(uint256 amount) external',
+];
+
+// Perp Exchange ABI
+export const PERP_EXCHANGE_ABI = [
+  'function openPosition(address token, uint256 collateralAmount, uint256 leverage, bool isLong) external',
+  'function closePosition(address token) external',
+  'function addCollateral(address token, uint256 amount) external',
+  'function removeCollateral(address token, uint256 amount) external',
+  'function liquidate(address user, address token) external',
+  'function getPosition(address user, address token) external view returns (uint256 size, uint256 collateral, uint256 entryPrice, bool isLong, int256 unrealizedPnl, uint256 leverage, uint256 liquidationPrice)',
+  'function isLiquidatable(address user, address token) external view returns (bool)',
+  'function getMarkets() external view returns (address[] memory)',
+  'function getFundingInfo() external view returns (int256 currentFundingRate, uint256 nextFundingTime, uint256 longOI, uint256 shortOI)',
+  'function collateralToken() external view returns (address)',
+  'function priceOracle() external view returns (address)',
+  'function MAX_LEVERAGE() external view returns (uint256)',
+  'function TRADING_FEE() external view returns (uint256)',
+];
+
+// Price Oracle ABI
+export const PRICE_ORACLE_ABI = [
+  'function getPrice(address token) external view returns (uint256)',
+  'function setPrice(address token, uint256 price) external',
+  'function prices(address token) external view returns (uint256)',
+  'function lastUpdated(address token) external view returns (uint256)',
 ];
