@@ -22,6 +22,10 @@ export const CONTRACTS = {
   // Perp DEX contracts
   perpExchange: '0xdE830e296d410f5B605c8D046D761692951Cafee',
   priceOracle: '0x77bF48BC59750D8B2c672538d14d56F11226AAd5',
+  // Limit Orders & Farming
+  limitOrderBook: '0x1100abe0A74aEE8E1A3a69983bd733c6BEE5E4eF',
+  lpFarm: '0xac7E0e57DE96F64AE52EB5e682Ad14f6982d9130',
+  chordToken: '0x2A3a79353219645F53c611d46828293b6305E072',
 };
 
 // ABI snippets for contract interaction
@@ -87,4 +91,31 @@ export const PRICE_ORACLE_ABI = [
   'function setPrice(address token, uint256 price) external',
   'function prices(address token) external view returns (uint256)',
   'function lastUpdated(address token) external view returns (uint256)',
+];
+
+// Limit Order Book ABI
+export const LIMIT_ORDER_ABI = [
+  'function createOrder(address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 duration) external returns (uint256 orderId)',
+  'function cancelOrder(uint256 orderId) external',
+  'function executeOrder(uint256 orderId) external',
+  'function claimExpired(uint256 orderId) external',
+  'function getUserOrders(address user) external view returns (uint256[] memory)',
+  'function getActiveOrders(address user) external view returns (tuple(address owner, address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 createdAt, uint256 expiresAt, bool isActive)[] memory)',
+  'function canExecute(uint256 orderId) external view returns (bool)',
+  'function getOrderLimitPrice(uint256 orderId) external view returns (uint256)',
+  'function orders(uint256 orderId) external view returns (address owner, address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 createdAt, uint256 expiresAt, bool isActive)',
+];
+
+// LP Farm ABI
+export const LP_FARM_ABI = [
+  'function poolLength() external view returns (uint256)',
+  'function pendingReward(uint256 pid, address user) external view returns (uint256)',
+  'function getPoolInfo(uint256 pid) external view returns (address lpToken, uint256 allocPoint, uint256 totalStaked, uint256 depositFee, uint256 accRewardPerShare)',
+  'function getUserInfo(uint256 pid, address user) external view returns (uint256 amount, uint256 pending, uint256 lastStakeTime)',
+  'function deposit(uint256 pid, uint256 amount) external',
+  'function withdraw(uint256 pid, uint256 amount) external',
+  'function claim(uint256 pid) external',
+  'function emergencyWithdraw(uint256 pid) external',
+  'function rewardPerSecond() external view returns (uint256)',
+  'function totalAllocPoint() external view returns (uint256)',
 ];

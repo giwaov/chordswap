@@ -4,9 +4,19 @@ import { useWallet } from './hooks/useWallet';
 import SwapCard from './components/SwapCard';
 import LiquidityCard from './components/LiquidityCard';
 import PerpCard from './components/PerpCard';
+import LimitOrders from './components/LimitOrders';
+import FarmCard from './components/FarmCard';
+import PriceChart from './components/PriceChart';
+import PoolAnalytics from './components/PoolAnalytics';
 import Header from './components/Header';
+import { CONTRACTS } from './config';
 
-type Tab = 'swap' | 'liquidity' | 'perp';
+type Tab = 'swap' | 'liquidity' | 'perp' | 'limit' | 'farm';
+
+const TOKENS = [
+  { address: CONTRACTS.tokenA, symbol: 'ARCA', name: 'Arc Token A' },
+  { address: CONTRACTS.tokenB, symbol: 'ARCB', name: 'Arc Token B' },
+];
 
 function App() {
   const wallet = useWallet();
@@ -18,33 +28,53 @@ function App() {
       
       <Header wallet={wallet} />
 
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-lg mx-auto">
-          {/* Tab Navigation */}
-          <div className="flex gap-2 mb-6">
+      <main className="container mx-auto px-4 py-8">
+        {/* Tab Navigation */}
+        <div className="max-w-3xl mx-auto mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2">
             <button
               onClick={() => setActiveTab('swap')}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
                 activeTab === 'swap'
                   ? 'bg-arc-primary text-white'
                   : 'bg-arc-dark/50 text-gray-400 hover:text-white'
               }`}
             >
-              Swap
+              🔄 Swap
+            </button>
+            <button
+              onClick={() => setActiveTab('limit')}
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
+                activeTab === 'limit'
+                  ? 'bg-arc-primary text-white'
+                  : 'bg-arc-dark/50 text-gray-400 hover:text-white'
+              }`}
+            >
+              📝 Limit
             </button>
             <button
               onClick={() => setActiveTab('liquidity')}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
                 activeTab === 'liquidity'
                   ? 'bg-arc-primary text-white'
                   : 'bg-arc-dark/50 text-gray-400 hover:text-white'
               }`}
             >
-              Liquidity
+              💧 Liquidity
+            </button>
+            <button
+              onClick={() => setActiveTab('farm')}
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
+                activeTab === 'farm'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                  : 'bg-arc-dark/50 text-gray-400 hover:text-white'
+              }`}
+            >
+              🌾 Farm
             </button>
             <button
               onClick={() => setActiveTab('perp')}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
                 activeTab === 'perp'
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
                   : 'bg-arc-dark/50 text-gray-400 hover:text-white'
@@ -53,15 +83,58 @@ function App() {
               ⚡ Perps
             </button>
           </div>
+        </div>
 
-          {/* Cards */}
-          {activeTab === 'swap' && <SwapCard wallet={wallet} />}
-          {activeTab === 'liquidity' && <LiquidityCard wallet={wallet} />}
+        {/* Content */}
+        <div className="max-w-3xl mx-auto">
+          {activeTab === 'swap' && (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <SwapCard wallet={wallet} />
+              </div>
+              <div className="space-y-6">
+                {wallet.signer && (
+                  <PriceChart 
+                    tokenIn={TOKENS[0]} 
+                    tokenOut={TOKENS[1]} 
+                    signer={wallet.signer} 
+                  />
+                )}
+                {wallet.signer && (
+                  <PoolAnalytics 
+                    signer={wallet.signer} 
+                    isConnected={wallet.isConnected} 
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'limit' && (
+            <div className="max-w-lg mx-auto">
+              <LimitOrders wallet={wallet} />
+            </div>
+          )}
+          
+          {activeTab === 'liquidity' && (
+            <div className="max-w-lg mx-auto">
+              <LiquidityCard wallet={wallet} />
+            </div>
+          )}
+          
+          {activeTab === 'farm' && (
+            <div className="max-w-lg mx-auto">
+              <FarmCard wallet={wallet} />
+            </div>
+          )}
+          
           {activeTab === 'perp' && (
-            <PerpCard 
-              account={wallet.address || ''} 
-              provider={wallet.provider} 
-            />
+            <div className="max-w-lg mx-auto">
+              <PerpCard 
+                account={wallet.address || ''} 
+                provider={wallet.provider} 
+              />
+            </div>
           )}
 
           {/* Network Warning */}

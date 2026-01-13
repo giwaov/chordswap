@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Contract, parseUnits, formatUnits } from 'ethers';
 import { toast } from 'react-hot-toast';
-import { CONTRACTS, ROUTER_ABI, ERC20_ABI } from '../config';
+import { CONTRACTS, ROUTER_ABI, ERC20_ABI, FACTORY_ABI, PAIR_ABI } from '../config';
 
 interface SwapCardProps {
   wallet: {
@@ -26,6 +26,8 @@ export default function SwapCard({ wallet }: SwapCardProps) {
   const [balanceOut, setBalanceOut] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
   const [isFauceting, setIsFauceting] = useState(false);
+  const [priceImpact, setPriceImpact] = useState<number>(0);
+  const [reserves, setReserves] = useState<{ reserveIn: string; reserveOut: string } | null>(null);
 
   const tokenIn = TOKENS[tokenInIndex];
   const tokenOut = TOKENS[tokenOutIndex];
@@ -59,22 +61,50 @@ export default function SwapCard({ wallet }: SwapCardProps) {
     }
   }, [wallet.isConnected, fetchBalances]);
 
-  // Get quote
+  // Get quote and calculate price impact
   useEffect(() => {
     if (!wallet.signer || !amountIn || parseFloat(amountIn) <= 0 || !CONTRACTS.router) {
       setAmountOut('');
+      setPriceImpact(0);
       return;
     }
 
     const getQuote = async () => {
       try {
         const router = new Contract(CONTRACTS.router, ROUTER_ABI, wallet.signer);
+        const factory = new Contract(CONTRACTS.factory, FACTORY_ABI, wallet.signer);
+        
         const amountInWei = parseUnits(amountIn, 18);
         const quote = await router.getAmountOut(amountInWei, tokenIn.address, tokenOut.address);
         setAmountOut(formatUnits(quote, 18));
+
+        // Calculate price impact
+        const pairAddress = await factory.getPair(tokenIn.address, tokenOut.address);
+        if (pairAddress && pairAddress !== '0x0000000000000000000000000000000000000000') {
+          const pair = new Contract(pairAddress, PAIR_ABI, wallet.signer);
+          const [reserve0, reserve1] = await pair.getReserves();
+          const token0 = await pair.token0();
+          
+          const [reserveIn, reserveOut] = tokenIn.address.toLowerCase() === token0.toLowerCase()
+            ? [reserve0, reserve1]
+            : [reserve1, reserve0];
+          
+          setReserves({
+            reserveIn: formatUnits(reserveIn, 18),
+            reserveOut: formatUnits(reserveOut, 18)
+          });
+
+          // Price impact = (amount_in / reserve_in) * 100
+          // More accurate: compare spot price vs execution price
+          const spotPrice = Number(formatUnits(reserveOut, 18)) / Number(formatUnits(reserveIn, 18));
+          const executionPrice = Number(formatUnits(quote, 18)) / Number(amountIn);
+          const impact = ((spotPrice - executionPrice) / spotPrice) * 100;
+          setPriceImpact(Math.max(0, impact));
+        }
       } catch (error) {
         console.error('Failed to get quote:', error);
         setAmountOut('');
+        setPriceImpact(0);
       }
     };
 
@@ -291,6 +321,45 @@ export default function SwapCard({ wallet }: SwapCardProps) {
                 <span>Minimum Received</span>
                 <span>{(parseFloat(amountOut) * 0.995).toFixed(6)} {tokenOut.symbol}</span>
               </div>
+              <div className={`flex justify-between mt-1 ${priceImpact > 5 ? 'text-red-400' : priceImpact > 2 ? 'text-yellow-400' : 'text-gray-400'}`}>
+                <span>Price Impact</span>
+                <span>{priceImpact.toFixed(2)}%</span>
+              </div>
+              {reserves && (
+                <div className="flex justify-between text-gray-500 mt-1 text-xs">
+                  <span>Pool Liquidity</span>
+                  <span>{parseFloat(reserves.reserveIn).toFixed(2)} / {parseFloat(reserves.reserveOut).toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Price Impact Warning */}
+          {priceImpact > 5 && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl">
+              <div className="flex items-center gap-2 text-red-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span className="font-semibold">High Price Impact!</span>
+              </div>
+              <p className="text-red-400/80 text-sm mt-1">
+                This swap has a {priceImpact.toFixed(2)}% price impact. Consider swapping a smaller amount.
+              </p>
+            </div>
+          )}
+
+          {priceImpact > 2 && priceImpact <= 5 && (
+            <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-xl">
+              <div className="flex items-center gap-2 text-yellow-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">Moderate Price Impact</span>
+              </div>
+              <p className="text-yellow-400/80 text-sm mt-1">
+                This swap has a {priceImpact.toFixed(2)}% price impact.
+              </p>
             </div>
           )}
 
