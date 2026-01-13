@@ -6,13 +6,14 @@ import LiquidityCard from './components/LiquidityCard';
 import PerpCard from './components/PerpCard';
 import LimitOrders from './components/LimitOrders';
 import FarmCard from './components/FarmCard';
+import LendingCard from './components/LendingCard';
 import PriceChart from './components/PriceChart';
 import PoolAnalytics from './components/PoolAnalytics';
 import TransactionHistory from './components/TransactionHistory';
 import Header from './components/Header';
 import { CONTRACTS } from './config';
 
-type Tab = 'swap' | 'liquidity' | 'perp' | 'limit' | 'farm' | 'history';
+type Tab = 'swap' | 'liquidity' | 'perp' | 'limit' | 'farm' | 'lend' | 'history';
 
 const TOKENS = [
   { address: CONTRACTS.tokenA, symbol: 'ARCA', name: 'Arc Token A' },
@@ -84,6 +85,16 @@ function App() {
               ⚡ Perps
             </button>
             <button
+              onClick={() => setActiveTab('lend')}
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
+                activeTab === 'lend'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+                  : 'bg-arc-dark/50 text-gray-400 hover:text-white'
+              }`}
+            >
+              🏦 Lend
+            </button>
+            <button
               onClick={() => setActiveTab('history')}
               className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
                 activeTab === 'history'
@@ -148,6 +159,12 @@ function App() {
             </div>
           )}
           
+          {activeTab === 'lend' && (
+            <div className="max-w-3xl mx-auto">
+              <LendingCard wallet={wallet} />
+            </div>
+          )}
+          
           {activeTab === 'history' && (
             <div className="max-w-2xl mx-auto">
               <TransactionHistory wallet={wallet} />
@@ -163,7 +180,7 @@ function App() {
 
           {/* Info */}
           <div className="mt-8 text-center text-gray-500 text-sm">
-            <p>ChordSwap on Arc Testnet</p>
+            <p>CredArc on Arc Testnet</p>
             <p className="mt-1">
               Get testnet USDC from{' '}
               <a

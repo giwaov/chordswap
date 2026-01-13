@@ -26,6 +26,12 @@ export const CONTRACTS = {
   limitOrderBook: '0x1100abe0A74aEE8E1A3a69983bd733c6BEE5E4eF',
   lpFarm: '0xac7E0e57DE96F64AE52EB5e682Ad14f6982d9130',
   chordToken: '0x2A3a79353219645F53c611d46828293b6305E072',
+  // Lending Protocol
+  lendingPool: '0x379a5c43956D00C19a1907902df6D032B8396E21',
+  lendingOracle: '0x809D7d7C0B8CDcaFd001064c6CA3ebdd2B257664',
+  lendingUSDC: '0xA0123f65B2cFBFAe63D7658623e8A793f92ff0bB',
+  lendingWETH: '0x9376a9B1D0E4f04C86263fD3BA06a214fEE8806b',
+  lendingWBTC: '0x753b4F8886473bc6c8358af72ad0Ad44218e2805',
 };
 
 // ABI snippets for contract interaction
@@ -118,4 +124,54 @@ export const LP_FARM_ABI = [
   'function emergencyWithdraw(uint256 pid) external',
   'function rewardPerSecond() external view returns (uint256)',
   'function totalAllocPoint() external view returns (uint256)',
+];
+
+// Lending Pool ABI
+export const LENDING_POOL_ABI = [
+  'function supply(address asset, uint256 amount) external',
+  'function withdraw(address asset, uint256 amount) external',
+  'function borrow(address asset, uint256 amount) external',
+  'function repay(address asset, uint256 amount) external',
+  'function enableCollateral(address asset) external',
+  'function disableCollateral(address asset) external',
+  'function liquidate(address borrower, address repayAsset, address collateralAsset, uint256 repayAmount) external',
+  'function flashLoan(address asset, uint256 amount, address receiver, bytes calldata data) external',
+  'function accrueInterest(address asset) external',
+  'function borrowBalance(address user, address asset) external view returns (uint256)',
+  'function healthFactor(address user) external view returns (uint256)',
+  'function getUserAccountData(address user) external view returns (uint256 totalCollateralValue, uint256 totalBorrowValue, uint256 availableBorrowValue, uint256 currentHealthFactor)',
+  'function userAssetBalance(address user, address asset) external view returns (uint256)',
+  'function getMarketRates(address asset) external view returns (uint256 supplyAPR, uint256 borrowAPR, uint256 utilization)',
+  'function getMarketInfo(address asset) external view returns (address aToken, uint256 totalSupply, uint256 totalBorrows, uint256 totalReserves, uint256 collateralFactor, uint256 liquidationThreshold, uint256 reserveFactor, bool isListed, bool canBorrow, bool canCollateral)',
+  'function getAllMarkets() external view returns (address[] memory)',
+  'function userCollateral(address user, address asset) external view returns (bool)',
+  'function markets(address asset) external view returns (address aToken, uint256 collateralFactor, uint256 liquidationThreshold, uint256 reserveFactor, uint256 totalSupply, uint256 totalBorrows, uint256 totalReserves, uint256 borrowIndex, uint256 lastUpdateTime, bool isListed, bool canBorrow, bool canCollateral)',
+];
+
+// Lending token info
+export const LENDING_TOKENS = [
+  { 
+    address: '0xA0123f65B2cFBFAe63D7658623e8A793f92ff0bB', 
+    symbol: 'USDC', 
+    name: 'USD Coin', 
+    decimals: 6,
+    icon: '💵',
+    color: 'from-green-500 to-emerald-500'
+  },
+  { 
+    address: '0x9376a9B1D0E4f04C86263fD3BA06a214fEE8806b', 
+    symbol: 'WETH', 
+    name: 'Wrapped Ether', 
+    decimals: 18,
+    icon: '⟠',
+    color: 'from-blue-500 to-indigo-500'
+  },
+  { 
+    address: '0x753b4F8886473bc6c8358af72ad0Ad44218e2805', 
+    symbol: 'WBTC', 
+    name: 'Wrapped Bitcoin', 
+    decimals: 8,
+    icon: '₿',
+    color: 'from-orange-500 to-amber-500'
+  },
 ];

@@ -26,7 +26,7 @@ export default function Header({ wallet }: HeaderProps) {
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">ChordSwap</h1>
+            <h1 className="text-xl font-bold text-white">CredArc</h1>
             <p className="text-xs text-gray-500">Testnet</p>
           </div>
         </div>
