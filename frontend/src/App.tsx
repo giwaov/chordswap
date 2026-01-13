@@ -8,10 +8,11 @@ import LimitOrders from './components/LimitOrders';
 import FarmCard from './components/FarmCard';
 import PriceChart from './components/PriceChart';
 import PoolAnalytics from './components/PoolAnalytics';
+import TransactionHistory from './components/TransactionHistory';
 import Header from './components/Header';
 import { CONTRACTS } from './config';
 
-type Tab = 'swap' | 'liquidity' | 'perp' | 'limit' | 'farm';
+type Tab = 'swap' | 'liquidity' | 'perp' | 'limit' | 'farm' | 'history';
 
 const TOKENS = [
   { address: CONTRACTS.tokenA, symbol: 'ARCA', name: 'Arc Token A' },
@@ -82,6 +83,16 @@ function App() {
             >
               ⚡ Perps
             </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`py-2 px-4 rounded-xl font-medium transition-all whitespace-nowrap ${
+                activeTab === 'history'
+                  ? 'bg-arc-primary text-white'
+                  : 'bg-arc-dark/50 text-gray-400 hover:text-white'
+              }`}
+            >
+              📜 History
+            </button>
           </div>
         </div>
 
@@ -134,6 +145,12 @@ function App() {
                 account={wallet.address || ''} 
                 provider={wallet.provider} 
               />
+            </div>
+          )}
+          
+          {activeTab === 'history' && (
+            <div className="max-w-2xl mx-auto">
+              <TransactionHistory wallet={wallet} />
             </div>
           )}
 
